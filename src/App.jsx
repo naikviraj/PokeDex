@@ -68,8 +68,13 @@ function App() {
       <div className="header bg-black">
         <div className="bg">
           <video autoPlay muted loop className="bg-video" style={{ width: "100%" }}>
+<<<<<<< HEAD
           <source src="https://www.desktophut.com/files/1683999977-1683999977-pokemon-ash-live-wallpaper.mp4" type="video/mp4" />
                       Your browser does not support the video tag.
+=======
+            <source src="https://github.com/naikviraj/PokeDex/blob/main/Images/gokukid.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+>>>>>>> 8134c510db88b48d2206d340774ce275286ed9ff
           </video>
           <div className="overlay-text">
             <h1 className="text-9xl font-extrabold">POKEDEX</h1>
@@ -80,7 +85,11 @@ function App() {
         </div>
         <div className="search-bar flex justify-between items-center p-1">
           <div className="flex-shrink-0 ml-5 p-1">
+<<<<<<< HEAD
             <img src="https://pokedex-react-mui.netlify.app/static/media/pokedex.2800773d.png" alt="logo" className="h-20" />
+=======
+            <img src="https://drive.google.com/uc?export=view&id=14OsUKdxVfhbQvHbXhthoTLPGkls_hUXh" alt="logo" className="h-20" />
+>>>>>>> 8134c510db88b48d2206d340774ce275286ed9ff
           </div>
           <div className="mr-8">
             <input
