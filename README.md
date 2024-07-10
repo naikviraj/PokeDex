@@ -32,11 +32,4 @@ PokeDex is a web application developed using React and PokeAPI to display inform
 
 2. Open `http://localhost:3000` in your web browser.
 
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit pull requests to contribute.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
       
