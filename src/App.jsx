@@ -68,7 +68,7 @@ function App() {
       <div className="header bg-black">
         <div className="bg">
           <video autoPlay muted loop className="bg-video" style={{ width: "100%" }}>
-            <source src="./Images/gokukid.mp4" type="video/mp4" />
+            <source src="https://github.com/naikviraj/PokeDex/blob/main/Images/gokukid.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           <div className="overlay-text">
