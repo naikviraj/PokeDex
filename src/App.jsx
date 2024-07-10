@@ -80,7 +80,7 @@ function App() {
         </div>
         <div className="search-bar flex justify-between items-center p-1">
           <div className="flex-shrink-0 ml-5 p-1">
-            <img src="./Images/pokelogo.png" alt="logo" className="h-20" />
+            <img src="https://github.com/naikviraj/PokeDex/blob/main/Images/pokelogo.png" alt="logo" className="h-20" />
           </div>
           <div className="mr-8">
             <input
