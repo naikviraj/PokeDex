@@ -6,7 +6,6 @@ PokeDex is a web application developed using React and PokeAPI to display inform
 
 - **Search:** Search for Pokémon by name or ID.
 - **Details:** View detailed information about each Pokémon, including abilities, types, and stats.
-- **Responsive:** Designed to work seamlessly on desktop and mobile devices.
 
 ## Technologies Used
 
