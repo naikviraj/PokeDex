@@ -80,7 +80,7 @@ function App() {
         </div>
         <div className="search-bar flex justify-between items-center p-1">
           <div className="flex-shrink-0 ml-5 p-1">
-            <img href="https://drive.google.com/uc?export=view&id=14OsUKdxVfhbQvHbXhthoTLPGkls_hUXh" alt="logo" className="h-20" />
+            <img src="https://drive.google.com/uc?export=view&id=14OsUKdxVfhbQvHbXhthoTLPGkls_hUXh" alt="logo" className="h-20" />
           </div>
           <div className="mr-8">
             <input
