@@ -1,28 +1,42 @@
 # PokeDex
 
-A simple Pokedex application built with React and Vite, fetching data from the PokeAPI.
-
-## Demo
-
-Check out the live demo [here](https://your-live-demo-link.vercel.app/).
+PokeDex is a web application developed using React and PokeAPI to display information about Pokémon.
 
 ## Features
 
-- Search for Pokémon by name
-- Display Pokémon details
+- **Search:** Search for Pokémon by name or ID.
+- **Details:** View detailed information about each Pokémon, including abilities, types, and stats.
+- **Responsive:** Designed to work seamlessly on desktop and mobile devices.
 
-## Getting Started
+## Technologies Used
 
-Follow these instructions to set up and run the project locally.
+- React
+- PokeAPI
+- HTML/CSS
 
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-
-### Installation
+## Installation
 
 1. Clone the repository:
-   ```sh
    git clone https://github.com/naikviraj/PokeDex.git
+
+2. Navigate into the project directory:
    cd PokeDex
+   
+4. Install dependencies:
+   npm install
+
+
+## Usage
+
+1. Start the development server:
+
+2. Open `http://localhost:3000` in your web browser.
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit pull requests to contribute.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+      
