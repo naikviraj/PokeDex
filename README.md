@@ -12,6 +12,7 @@ PokeDex is a web application developed using React and PokeAPI to display inform
 - React
 - PokeAPI
 - HTML/CSS
+- JavaScript
 
 ## Issues 
    Sometines the pokemons take time to load, therefore the search function may not work.
