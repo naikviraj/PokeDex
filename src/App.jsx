@@ -4,11 +4,13 @@ import { FaArrowDown } from "react-icons/fa";
 
 function App() {
   const [allPokemons, setAllPokemons] = useState([]);
-  const [loadMore, setLoadMore] = useState('https://pokeapi.co/api/v2/pokemon/?limit=20');
+  const [loadMore, setLoadMore] = useState('https://pokeapi.co/api/v2/pokemon/?limit=1027');
   const [scrollEnabled, setScrollEnabled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPokemons, setFilteredPokemons] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false);
+  const [pokemonLoadingStates, setPokemonLoadingStates] = useState({});
+  const [searchedPokemon, setSearchedPokemon] = useState(null);
   const uniquePokemonNames = new Set();
 
   useEffect(() => {
@@ -23,11 +25,22 @@ function App() {
     if (searchQuery) {
       const filtered = allPokemons.filter(pokemon => 
         pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        pokemon.id.toString().includes(searchQuery)
+        pokemon.id.toString().includes(searchQuery) ||
+        pokemon.types.some(typeInfo => typeInfo.type.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        pokemon.height.toString().includes(searchQuery) ||
+        pokemon.weight.toString().includes(searchQuery)
       );
+
       setFilteredPokemons(filtered);
+
+      if (filtered.length === 0) {
+        fetchSearchedPokemon(searchQuery);
+      } else {
+        setSearchedPokemon(null);
+      }
     } else {
       setFilteredPokemons(allPokemons);
+      setSearchedPokemon(null);
     }
   }, [searchQuery, allPokemons]);
 
@@ -45,8 +58,24 @@ function App() {
     setSearchQuery(event.target.value);
   };
 
+  const fetchSearchedPokemon = async (query) => {
+    setGlobalLoading(true);
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchedPokemon(data);
+      } else {
+        setSearchedPokemon(null);
+      }
+    } catch (error) {
+      setSearchedPokemon(null);
+    }
+    setGlobalLoading(false);
+  };
+
   const getAllPokemons = async () => {
-    setIsLoading(true);
+    setGlobalLoading(true);
     const res = await fetch(loadMore);
     const data = await res.json();
     setLoadMore(data.next);
@@ -55,15 +84,17 @@ function App() {
       for (const pokemon of result) {
         if (!uniquePokemonNames.has(pokemon.name)) {
           uniquePokemonNames.add(pokemon.name);
+          setPokemonLoadingStates(prevState => ({ ...prevState, [pokemon.name]: true }));
           const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
           const data = await res.json();
           setAllPokemons(currentList => [...currentList, data]);
+          setPokemonLoadingStates(prevState => ({ ...prevState, [pokemon.name]: false }));
         }
       }
     }
 
     await createPokemonObject(data.results);
-    setIsLoading(false);
+    setGlobalLoading(false);
   };
 
   return (
@@ -94,7 +125,14 @@ function App() {
         </div>
       </div>
       <div className="content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        {filteredPokemons.length === 0 ? <p>Pokemon Not Found</p> : <Card data={filteredPokemons} isLoading={isLoading} />}
+        {filteredPokemons.length === 0 && !searchedPokemon ? (
+          <p>Pokemon Not Found</p>
+        ) : (
+          filteredPokemons.map(pokemon => (
+            <Card key={pokemon.id} data={pokemon} isLoading={pokemonLoadingStates[pokemon.name] || false} />
+          ))
+        )}
+        {searchedPokemon && <Card key={searchedPokemon.id} data={searchedPokemon} isLoading={globalLoading} />}
       </div>
       <div className="load-more-button">
         <button className="load-more" onClick={getAllPokemons}>Load More</button>
