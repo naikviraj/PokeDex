@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card } from "./assets/Card/Card";
+import { Card } from "./assets/Components/Card";
 import { FaArrowDown } from "react-icons/fa";
 
 function App() {
