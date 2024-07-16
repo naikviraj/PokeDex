@@ -126,7 +126,11 @@ function App() {
       </div>
       <div className="content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {filteredPokemons.length === 0 && !searchedPokemon ? (
-          <p>Pokemon Not Found</p>
+          globalLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>Pokemon Not Found</p>
+          )
         ) : (
           filteredPokemons.map(pokemon => (
             <Card key={pokemon.id} data={pokemon} isLoading={pokemonLoadingStates[pokemon.name] || false} />
