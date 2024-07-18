@@ -316,3 +316,119 @@ p {
   border-radius: 4px;
   cursor: pointer;
 }
+
+
+/* Existing styles */
+
+.progress-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progress-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-name {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-background {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: #4a90da;
+  height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 0.875rem;
+  border-radius: 5px;
+}
+
+.popup-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Existing styles */
+
+.chart-type-selection {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chart-type-selection label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.chart-type-selection input {
+  margin-right: 0.5rem;
+}
+
+.progress-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progress-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-name {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-background {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: #4a90da;
+  height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 0.875rem;
+  border-radius: 5px;
+}
+
+.popup-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

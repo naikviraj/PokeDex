@@ -21,6 +21,7 @@ const getNameClass = (name) => {
 export const Card = ({ data, isLoading }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [pokemonDetails, setPokemonDetails] = useState(null);
+  const [chartType, setChartType] = useState('radar');
   const pokemons = Array.isArray(data) ? data : [data];
 
   const fetchAdditionalDetails = async (name) => {
@@ -41,6 +42,10 @@ export const Card = ({ data, isLoading }) => {
   const handleClosePopup = () => {
     setShowPopup(false);
     setPokemonDetails(null);
+  };
+
+  const handleChartTypeChange = (e) => {
+    setChartType(e.target.value);
   };
 
   return (
@@ -80,27 +85,67 @@ export const Card = ({ data, isLoading }) => {
                 <div className="popup-overlay" onClick={handleClosePopup}>
                   <div className="popup-card" onClick={(e) => e.stopPropagation()}>
                     <h3>{capitalizeFirstLetter(pokemonDetails.name)} Details</h3>
-                    <Radar
-                      data={{
-                        labels: ['HP', 'Attack', 'Defense', 'Special Attack', 'Special Defense', 'Speed'],
-                        datasets: [
-                          {
-                            label: `${capitalizeFirstLetter(pokemonDetails.name)} Stats`,
-                            data: pokemonDetails.stats.map(stat => stat.base_stat),
-                            backgroundColor: 'rgba(34, 202, 236, 0.2)',
-                            borderColor: 'rgba(34, 202, 236, 1)',
-                            borderWidth: 1,
+                    <div className="chart-type-selection">
+                      <label>
+                        <input
+                          type="radio"
+                          name="chartType"
+                          value="radar"
+                          checked={chartType === 'radar'}
+                          onChange={handleChartTypeChange}
+                        />
+                        Radar Chart
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="chartType"
+                          value="progressBars"
+                          checked={chartType === 'progressBars'}
+                          onChange={handleChartTypeChange}
+                        />
+                        Progress Bars
+                      </label>
+                    </div>
+                    {chartType === 'radar' ? (
+                      <Radar
+                        data={{
+                          labels: ['HP', 'Attack', 'Defense', 'Special Attack', 'Special Defense', 'Speed'],
+                          datasets: [
+                            {
+                              label: `${capitalizeFirstLetter(pokemonDetails.name)} Stats`,
+                              data: pokemonDetails.stats.map(stat => stat.base_stat),
+                              backgroundColor: 'rgba(34, 202, 236, 0.2)',
+                              borderColor: 'rgba(34, 202, 236, 1)',
+                              borderWidth: 1,
+                            },
+                          ],
+                        }}
+                        options={{
+                          scales: {
+                            r: {
+                              beginAtZero: true,
+                            },
                           },
-                        ],
-                      }}
-                      options={{
-                        scales: {
-                          r: {
-                            beginAtZero: true,
-                          },
-                        },
-                      }}
-                    />
+                        }}
+                      />
+                    ) : (
+                      <div className="progress-bars">
+                        {pokemonDetails.stats.map(stat => (
+                          <div key={stat.stat.name} className="progress-bar">
+                            <span className="stat-name">{capitalizeFirstLetter(stat.stat.name)}</span>
+                            <div className="progress-bar-background">
+                              <div
+                                className="progress-bar-fill"
+                                style={{ width: `${stat.base_stat}%` }}
+                              >
+                                {stat.base_stat}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <button className="close-button" onClick={handleClosePopup}>
                       Close
                     </button>
