@@ -114,19 +114,29 @@ function App() {
     setSearchQuery(event.target.value);
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   return (
     <>
       <div className="header bg-black text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h3 className="text-4xl md:text-5xl lg:text-6xl">POKEDEX</h3>
-          <div className="search-bar text-black">
+          <div className="search-bar text-black flex items-center">
             <input
               type="search"
               placeholder="Search Here"
-              className="search p-2"
+              className="search p-2 rounded-l-full px-2"
               value={searchQuery}
               onChange={handleSearch}
             />
+            <button 
+              className="clear-button p-2 bg-gray-200 rounded-3xl px-3"
+              onClick={clearSearch}
+            >
+              &times;
+            </button>
           </div>
         </div>
       </div>
