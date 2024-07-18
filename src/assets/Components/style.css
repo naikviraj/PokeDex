@@ -42,7 +42,7 @@ body::-webkit-scrollbar-thumb:hover {
   object-fit: cover;
 }
 
-.header .search {
+/* .header .search {
   width: 100%;
   max-width: 350px;
   height: 35px;
@@ -50,7 +50,7 @@ body::-webkit-scrollbar-thumb:hover {
   padding: 1.2rem;
   border: 2px solid #ffffff;
   border-radius: 0;
-}
+} */
 
 .header .clear-button {
   height: 35px;

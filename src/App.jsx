@@ -127,7 +127,7 @@ function App() {
             <input
               type="search"
               placeholder="Search"
-              className="search p-2 rounded-l-full px-2"
+              className="search p-2 rounded-l-full rounded-r-full px-2"
               value={searchQuery}
               onChange={handleSearch}
             />
