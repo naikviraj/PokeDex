@@ -21,7 +21,7 @@ const getNameClass = (name) => {
 export const Card = ({ data, isLoading }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [pokemonDetails, setPokemonDetails] = useState(null);
-  const [chartType, setChartType] = useState('radar');
+  const [chartType, setChartType] = useState('progressBars');
   const pokemons = Array.isArray(data) ? data : [data];
 
   const fetchAdditionalDetails = async (name) => {
