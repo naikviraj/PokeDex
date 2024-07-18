@@ -126,7 +126,7 @@ function App() {
           <div className="search-bar text-black flex items-center">
             <input
               type="search"
-              placeholder="Search Here"
+              placeholder="Search"
               className="search p-2 rounded-l-full px-2"
               value={searchQuery}
               onChange={handleSearch}
