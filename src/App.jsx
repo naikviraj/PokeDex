@@ -1,119 +1,125 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "./assets/Components/Card";
-import { FaArrowDown } from "react-icons/fa";
 
 function App() {
-  const [allPokemons, setAllPokemons] = useState([]);
-  const [loadMore, setLoadMore] = useState('https://pokeapi.co/api/v2/pokemon/?limit=1027');
-  const [scrollEnabled, setScrollEnabled] = useState(false);
+  const [pokemons, setPokemons] = useState([]);
+  const [allPokemonNames, setAllPokemonNames] = useState([]);
+  const [loadMore, setLoadMore] = useState('https://pokeapi.co/api/v2/pokemon?offset=0&limit=10');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredPokemons, setFilteredPokemons] = useState([]);
-  const [globalLoading, setGlobalLoading] = useState(false);
-  const [pokemonLoadingStates, setPokemonLoadingStates] = useState({});
-  const [searchedPokemon, setSearchedPokemon] = useState(null);
-  const uniquePokemonNames = new Set();
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+
+  const scrollPositionRef = useRef(0);
 
   useEffect(() => {
-    getAllPokemons();
+    getAllPokemonNames();
+    getPokemons();
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle('no-scroll', !scrollEnabled);
-  }, [scrollEnabled]);
-
-  useEffect(() => {
     if (searchQuery) {
-      const filtered = allPokemons.filter(pokemon => 
-        pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        pokemon.id.toString().includes(searchQuery) ||
-        pokemon.types.some(typeInfo => typeInfo.type.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        pokemon.height.toString().includes(searchQuery) ||
-        pokemon.weight.toString().includes(searchQuery)
+      const filtered = allPokemonNames.filter(name => 
+        name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-      setFilteredPokemons(filtered);
-
-      if (filtered.length === 0) {
-        fetchSearchedPokemon(searchQuery);
+      if (filtered.length > 0) {
+        fetchFilteredPokemons(filtered);
       } else {
-        setSearchedPokemon(null);
+        fetchSearchedPokemon(searchQuery);
       }
     } else {
-      setFilteredPokemons(allPokemons);
-      setSearchedPokemon(null);
+      setSearchResults([]);
     }
-  }, [searchQuery, allPokemons]);
+  }, [searchQuery]);
 
-  const handleScroll = () => {
-    const contentSection = document.querySelector('.search-bar');
-    contentSection.scrollIntoView({ behavior: 'smooth' });
+  const getAllPokemonNames = async () => {
+    try {
+      const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1000');
+      const data = await res.json();
+      setAllPokemonNames(data.results.map(pokemon => pokemon.name));
+    } catch (error) {
+      console.error("Failed to fetch all Pokemon names:", error);
+    }
   };
 
-  const handleClick = () => {
-    setScrollEnabled(true);
-    handleScroll();
+  const getPokemons = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(loadMore);
+      const data = await res.json();
+      setLoadMore(data.next);
+
+      const pokemonDetails = await Promise.all(
+        data.results.map(async (pokemon) => {
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
+          return res.json();
+        })
+      );
+
+      setPokemons(currentList => {
+        const newPokemons = pokemonDetails.filter(pokemon => 
+          !currentList.some(existingPokemon => existingPokemon.id === pokemon.id)
+        );
+        return [...currentList, ...newPokemons];
+      });
+    } catch (error) {
+      console.error("Failed to fetch Pokemons:", error);
+    }
+    setIsLoading(false);
+  }, [loadMore]);
+
+  const loadMorePokemons = () => {
+    scrollPositionRef.current = window.pageYOffset;
+    getPokemons().then(() => {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    });
+  };
+
+  const fetchFilteredPokemons = async (filteredNames) => {
+    setIsLoading(true);
+    try {
+      const pokemonDetails = await Promise.all(
+        filteredNames.slice(0, 10).map(async (name) => {
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+          return res.json();
+        })
+      );
+      setSearchResults(pokemonDetails);
+    } catch (error) {
+      console.error("Failed to fetch filtered Pokemons:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchSearchedPokemon = async (query) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults([data]);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch searched Pokemon:", error);
+      setSearchResults([]);
+    }
+    setIsLoading(false);
   };
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  const fetchSearchedPokemon = async (query) => {
-    setGlobalLoading(true);
-    try {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSearchedPokemon(data);
-      } else {
-        setSearchedPokemon(null);
-      }
-    } catch (error) {
-      setSearchedPokemon(null);
-    }
-    setGlobalLoading(false);
-  };
-
-  const getAllPokemons = async () => {
-    setGlobalLoading(true);
-    const res = await fetch(loadMore);
-    const data = await res.json();
-    setLoadMore(data.next);
-
-    async function createPokemonObject(result) {
-      for (const pokemon of result) {
-        if (!uniquePokemonNames.has(pokemon.name)) {
-          uniquePokemonNames.add(pokemon.name);
-          setPokemonLoadingStates(prevState => ({ ...prevState, [pokemon.name]: true }));
-          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-          const data = await res.json();
-          setAllPokemons(currentList => [...currentList, data]);
-          setPokemonLoadingStates(prevState => ({ ...prevState, [pokemon.name]: false }));
-        }
-      }
-    }
-
-    await createPokemonObject(data.results);
-    setGlobalLoading(false);
-  };
-
   return (
     <>
-      <div className="header bg-black">
-        <div className="bg">
-          <img src="https://images8.alphacoders.com/114/thumb-1920-1140434.jpg" alt="" />
-          <div className="overlay-text">
-            <h1 className="text-9xl font-extrabold">POKEDEX</h1>
-          </div>
-          <button onClick={handleClick} className="overlay-button">
-            <FaArrowDown />
-          </button>
-        </div>
-        <div className="search-bar flex flex-col md:flex-row justify-between items-center p-1">
-          <div className="flex-shrink-0 ml-5 p-1">
-            <img src="https://pokedex-react-mui.netlify.app/static/media/pokedex.2800773d.png" alt="logo" className="h-20" />
-          </div>
-          <div className="mt-2 md:mt-0 mr-8">
+      <div className="header bg-black text-white p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <h3 className="text-4xl md:text-5xl lg:text-6xl">POKEDEX</h3>
+          <div className="search-bar text-black">
             <input
               type="search"
               placeholder="Search Here"
@@ -125,22 +131,27 @@ function App() {
         </div>
       </div>
       <div className="content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        {filteredPokemons.length === 0 && !searchedPokemon ? (
-          globalLoading ? (
-            <p>Loading...</p>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : searchQuery ? (
+          searchResults.length > 0 ? (
+            searchResults.map(pokemon => (
+              <Card key={pokemon.id} data={pokemon} isLoading={false} />
+            ))
           ) : (
             <p>Pokemon Not Found</p>
           )
         ) : (
-          filteredPokemons.map(pokemon => (
-            <Card key={pokemon.id} data={pokemon} isLoading={pokemonLoadingStates[pokemon.name] || false} />
+          pokemons.map(pokemon => (
+            <Card key={pokemon.id} data={pokemon} isLoading={false} />
           ))
         )}
-        {searchedPokemon && <Card key={searchedPokemon.id} data={searchedPokemon} isLoading={globalLoading} />}
       </div>
-      <div className="load-more-button">
-        <button className="load-more" onClick={getAllPokemons}>Load More</button>
-      </div>
+      {!searchQuery && (
+        <div className="load-more-button">
+          <button className="load-more" onClick={loadMorePokemons}>Load More</button>
+        </div>
+      )}
     </>
   );
 }
