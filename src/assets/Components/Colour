@@ -17,5 +17,5 @@ export const typeColors = {
     dragon: '#A27DFA',
     steel: '#D1D1E0',
     fairy: '#F4BDC9',
-  };
+  };  
   

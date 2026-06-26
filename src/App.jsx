@@ -1,168 +1,168 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Card } from "./assets/Components/Card";
+import React, { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import PokedexPage from './components/PokedexPage';
+import RegionExplorer from './components/RegionExplorer';
+import TypeExplorer from './components/TypeExplorer';
+import FavoritesPage from './components/FavoritesPage';
+import RandomPokemon from './components/RandomPokemon';
+import PokemonModal from './components/PokemonModal';
+import LoadingScreen from './components/LoadingScreen';
+import { usePokemonStore } from './store/usePokemonStore';
+import './assets/Components/style.css';
 
-function App() {
-  const [pokemons, setPokemons] = useState([]);
-  const [allPokemonNames, setAllPokemonNames] = useState([]);
-  const [loadMore, setLoadMore] = useState('https://pokeapi.co/api/v2/pokemon?offset=0&limit=10');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: 1, refetchOnWindowFocus: false },
+  },
+});
 
-  const scrollPositionRef = useRef(0);
+const pageVariants = {
+  initial: { opacity: 0, y: 20, scale: 0.99 },
+  animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } },
+  exit:    { opacity: 0, y: -20, scale: 0.98, transition: { duration: 0.25 } },
+};
+
+function AppInner() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [appReady, setAppReady] = useState(false);
+  const [activeType, setActiveType] = useState(null);
+  const [activeRegion, setActiveRegion] = useState(null);
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
 
   useEffect(() => {
-    getAllPokemonNames();
-    getPokemons();
+    const timer = setTimeout(() => setAppReady(true), 1200);
+    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (searchQuery) {
-      const filtered = allPokemonNames.filter(name => 
-        name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-      if (filtered.length > 0) {
-        fetchFilteredPokemons(filtered);
-      } else {
-        fetchSearchedPokemon(searchQuery);
-      }
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchQuery]);
-
-  const getAllPokemonNames = async () => {
-    try {
-      const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1000');
-      const data = await res.json();
-      setAllPokemonNames(data.results.map(pokemon => pokemon.name));
-    } catch (error) {
-      console.error("Failed to fetch all Pokemon names:", error);
-    }
+  const navigate = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const getPokemons = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(loadMore);
-      const data = await res.json();
-      setLoadMore(data.next);
-
-      const pokemonDetails = await Promise.all(
-        data.results.map(async (pokemon) => {
-          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-          return res.json();
-        })
-      );
-
-      setPokemons(currentList => {
-        const newPokemons = pokemonDetails.filter(pokemon => 
-          !currentList.some(existingPokemon => existingPokemon.id === pokemon.id)
-        );
-        return [...currentList, ...newPokemons];
-      });
-    } catch (error) {
-      console.error("Failed to fetch Pokemons:", error);
-    }
-    setIsLoading(false);
-  }, [loadMore]);
-
-  const loadMorePokemons = () => {
-    scrollPositionRef.current = window.pageYOffset;
-    getPokemons().then(() => {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPositionRef.current);
-      }, 100);
-    });
+  const handleExplore = () => {
+    navigate('pokedex');
+    setTimeout(() => {
+      document.getElementById('pokedex-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
-  const fetchFilteredPokemons = async (filteredNames) => {
-    setIsLoading(true);
-    try {
-      const pokemonDetails = await Promise.all(
-        filteredNames.slice(0, 10).map(async (name) => {
-          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-          return res.json();
-        })
-      );
-      setSearchResults(pokemonDetails);
-    } catch (error) {
-      console.error("Failed to fetch filtered Pokemons:", error);
-    }
-    setIsLoading(false);
+  const handleRandom = () => navigate('random');
+
+  const handleSelectRegion = (region) => {
+    setActiveRegion(region);
+    setActiveType(null);
+    navigate('pokedex');
   };
 
-  const fetchSearchedPokemon = async (query) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSearchResults([data]);
-      } else {
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch searched Pokemon:", error);
-      setSearchResults([]);
-    }
-    setIsLoading(false);
+  const handleSelectType = (type) => {
+    setActiveType(type);
+    setActiveRegion(null);
+    navigate('pokedex');
   };
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
+  const handleCardClick = (pokemon) => {
+    setSelectedPokemon(pokemon?.name || pokemon);
   };
 
-  const clearSearch = () => {
-    setSearchQuery('');
-  };
+  if (!appReady) return <LoadingScreen message="Booting Pokédex…" />;
 
   return (
-    <>
-      <div className="header bg-black text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h3 className="text-4xl md:text-5xl lg:text-6xl">POKEDEX</h3>
-          <div className="search-bar text-black flex items-center">
-            <input
-              type="search"
-              placeholder="Search"
-              className="search p-2 rounded-l-full rounded-r-full px-2"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            <button 
-              className="clear-button p-2 bg-gray-200 rounded-3xl px-3"
-              onClick={clearSearch}
-            >
-              &times;
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : searchQuery ? (
-          searchResults.length > 0 ? (
-            searchResults.map(pokemon => (
-              <Card key={pokemon.id} data={pokemon} isLoading={false} />
-            ))
-          ) : (
-            <p>Pokemon Not Found</p>
-          )
-        ) : (
-          pokemons.map(pokemon => (
-            <Card key={pokemon.id} data={pokemon} isLoading={false} />
-          ))
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', position: 'relative' }}>
+      <Navbar onNavigate={navigate} currentPage={currentPage} />
+
+      {/* Hero is always at home page */}
+      <AnimatePresence mode="wait">
+        {currentPage === 'home' && (
+          <motion.div key="home" variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <Hero onExplore={handleExplore} onRandom={handleRandom} />
+
+            {/* Below hero — teaser sections */}
+            <div style={{ paddingTop: '2rem' }}>
+              <RegionExplorer onSelectRegion={handleSelectRegion} />
+              <TypeExplorer activeType={null} onSelectType={handleSelectType} />
+              <RandomPokemon onCardClick={handleCardClick} />
+            </div>
+          </motion.div>
         )}
-      </div>
-      {!searchQuery && (
-        <div className="load-more-button">
-          <button className="load-more" onClick={loadMorePokemons}>Load More</button>
+
+        {currentPage === 'pokedex' && (
+          <motion.div key="pokedex" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ paddingTop: '5rem' }}>
+            <div id="pokedex-section">
+              <PokedexPage
+                activeType={activeType}
+                onNavigateType={setActiveType}
+                activeRegion={activeRegion}
+                onCardClick={handleCardClick}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {currentPage === 'regions' && (
+          <motion.div key="regions" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ paddingTop: '5rem' }}>
+            <RegionExplorer onSelectRegion={handleSelectRegion} />
+          </motion.div>
+        )}
+
+        {currentPage === 'types' && (
+          <motion.div key="types" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ paddingTop: '5rem' }}>
+            <TypeExplorer activeType={activeType} onSelectType={handleSelectType} />
+          </motion.div>
+        )}
+
+        {currentPage === 'favorites' && (
+          <motion.div key="favorites" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ paddingTop: '5rem' }}>
+            <FavoritesPage onCardClick={handleCardClick} />
+          </motion.div>
+        )}
+
+        {currentPage === 'random' && (
+          <motion.div key="random" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ paddingTop: '5rem' }}>
+            <RandomPokemon onCardClick={handleCardClick} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Global Modal */}
+      <AnimatePresence>
+        {selectedPokemon && (
+          <PokemonModal
+            pokemonName={selectedPokemon}
+            onClose={() => setSelectedPokemon(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Footer */}
+      <footer style={{
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '2rem',
+        textAlign: 'center',
+        color: 'rgba(240,240,255,0.2)',
+        fontSize: '0.8rem',
+        fontFamily: 'Space Grotesk',
+      }}>
+        <div style={{ marginBottom: '0.5rem' }}>
+          Powered by{' '}
+          <a href="https://pokeapi.co" target="_blank" rel="noreferrer" style={{ color: 'rgba(167,139,250,0.6)', textDecoration: 'none' }}>
+            PokéAPI
+          </a>
+          {' '}• Built with ♥ and Framer Motion
         </div>
-      )}
-    </>
+        <div>Pokémon and all related names are trademarks of Nintendo/Game Freak.</div>
+      </footer>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppInner />
+    </QueryClientProvider>
   );
 }
 
